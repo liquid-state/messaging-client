@@ -1,5 +1,12 @@
 import { MessagingError, MessagingAPIError } from './utils';
-import { IOptions, IMessagingClient } from './types';
+import {
+  IOptions,
+  IdentityOptions,
+  IMessagingClient,
+  IRawMessage,
+  IMessage,
+  IPagination,
+} from './types';
 
 const defaultOptions = {
   baseUrl: 'https://messaging.example.com/api/core/v1/apps/2/',
@@ -15,9 +22,9 @@ class MessagingClient implements IMessagingClient {
   private options: IOptions;
   private fetch: typeof fetch;
 
-  constructor(private jwt: string, options?: IOptions) {
-    if (!jwt) {
-      throw MessagingError('You must specify a JWT');
+  constructor(private identity: IdentityOptions, options?: IOptions) {
+    if (!identity.jwt && !identity.apiKey) {
+      throw MessagingError('You must specify a JWT or API Key');
     }
     if (!options) {
       this.options = defaultOptions;
@@ -36,20 +43,72 @@ class MessagingClient implements IMessagingClient {
     return result;
   }
 
+  private getNextPage(totalPages: number, currentPage: number) {
+    if (currentPage < totalPages) {
+      return currentPage + 1;
+    }
+
+    return null;
+  }
+
+  private mapRawMessage(rawMessage: IRawMessage): IMessage {
+    const {
+      is_deleted: isDeleted,
+      is_sent: isSent,
+      audience_type: audienceType,
+      audience_display: audienceDisplay,
+      schedule_type: scheduleType,
+      scheduled_datetime: scheduledDatetime,
+      next_send_datetime: nextSendDatetime,
+      last_sent_datetime: lastSentDatetime,
+      is_recurring: isRecurring,
+      recurring_offset: recurringOffset,
+      recurring_unit: recurringUnit,
+      should_increase_badge: shouldIncreaseBadge,
+      payload_options: payloadOptions,
+      owner_id: ownerId,
+      ...rest
+    } = rawMessage;
+
+    return {
+      ...rest,
+      isDeleted,
+      isSent,
+      audienceType,
+      audienceDisplay,
+      scheduleType,
+      scheduledDatetime,
+      nextSendDatetime,
+      lastSentDatetime,
+      isRecurring,
+      recurringOffset,
+      recurringUnit,
+      shouldIncreaseBadge,
+      payloadOptions,
+      ownerId,
+    };
+  }
+
   private sub() {
     // Get the body of the JWT.
-    const payload = this.jwt.split('.')[1];
-    // Which is base64 encoded.
-    const parsed = JSON.parse(atob(payload));
-    return parsed.sub;
+    if (this.identity.jwt) {
+      const payload = this.identity.jwt.split('.')[1];
+      // Which is base64 encoded.
+      const parsed = JSON.parse(atob(payload));
+      return parsed.sub;
+    }
+    return '';
   }
+
+  private getAuthHeader = () =>
+    this.identity.jwt ? `Bearer ${this.identity.jwt}` : `Token ${this.identity.apiKey}`;
 
   getMessageDetails = async (messageId: string) => {
     const url = this.getUrl('getMessageDetails');
     const resp = await this.fetch(url.replace('{{messageId}}', messageId), {
       method: 'GET',
       headers: {
-        Authorization: `Bearer ${this.jwt}`,
+        Authorization: this.getAuthHeader(),
       },
     });
 
@@ -65,14 +124,22 @@ class MessagingClient implements IMessagingClient {
     const resp = await this.fetch(url, {
       method: 'GET',
       headers: {
-        Authorization: `Bearer ${this.jwt}`,
+        Authorization: this.getAuthHeader(),
       },
     });
     if (!resp.ok) {
       throw MessagingAPIError('Unable to get pathways user details', resp);
     }
 
-    return resp.json();
+    const {
+      pagination,
+      result,
+    }: { pagination: IPagination; result: IRawMessage[] } = await resp.json();
+
+    return {
+      nextPage: this.getNextPage(pagination.num_pages, pagination.current_page),
+      result: result.map(message => this.mapRawMessage(message)),
+    };
   };
 }
 
