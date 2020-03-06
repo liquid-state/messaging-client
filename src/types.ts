@@ -1,4 +1,12 @@
-export interface IMessagingClient {}
+export interface IMessagingClient {
+  listMessages(
+    page?: number
+  ): Promise<{
+    nextPage: number | null;
+    result: IMessage[];
+  }>;
+  deleteMessage(messageId: string): Promise<boolean>;
+}
 
 export interface IOptions {
   baseUrl?: string;

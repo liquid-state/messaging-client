@@ -14,7 +14,8 @@ const defaultOptions = {
 };
 
 const pathMap: { [key: string]: string } = {
-  getMessageDetails: 'messages/{{messageId}}',
+  deleteMessage: 'messages/{{messageId}}/',
+  getMessageDetails: 'messages/{{messageId}}/',
   listMessages: 'messages/',
 };
 
@@ -103,6 +104,22 @@ class MessagingClient implements IMessagingClient {
   private getAuthHeader = () =>
     this.identity.jwt ? `Bearer ${this.identity.jwt}` : `Token ${this.identity.apiKey}`;
 
+  deleteMessage = async (messageId: string) => {
+    const url = this.getUrl('deleteMessage');
+    const resp = await this.fetch(url.replace('{{messageId}}', messageId), {
+      method: 'DELETE',
+      headers: {
+        Authorization: this.getAuthHeader(),
+      },
+    });
+
+    if (!resp.ok) {
+      throw MessagingAPIError('Unable to delete message', resp);
+    }
+
+    return resp.ok;
+  };
+
   getMessageDetails = async (messageId: string) => {
     const url = this.getUrl('getMessageDetails');
     const resp = await this.fetch(url.replace('{{messageId}}', messageId), {
@@ -113,7 +130,7 @@ class MessagingClient implements IMessagingClient {
     });
 
     if (!resp.ok) {
-      throw MessagingAPIError('Unable to get pathways user details', resp);
+      throw MessagingAPIError('Unable to get message details', resp);
     }
 
     return resp.json();
@@ -128,7 +145,7 @@ class MessagingClient implements IMessagingClient {
       },
     });
     if (!resp.ok) {
-      throw MessagingAPIError('Unable to get pathways user details', resp);
+      throw MessagingAPIError('Unable to get list of messages', resp);
     }
 
     const {
