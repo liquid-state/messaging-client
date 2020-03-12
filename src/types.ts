@@ -1,11 +1,12 @@
 export interface IMessagingClient {
+  createMessage(body: ICreateMessageInput): Promise<any>;
+  deleteMessage(messageId: string): Promise<boolean>;
   listMessages(
     page?: number
   ): Promise<{
     nextPage: number | null;
     result: IMessage[];
   }>;
-  deleteMessage(messageId: string): Promise<boolean>;
 }
 
 export interface IOptions {
@@ -16,6 +17,18 @@ export interface IOptions {
 export interface IdentityOptions {
   jwt?: string;
   apiKey?: string;
+}
+
+export interface ICreateMessageInput {
+  title: string;
+  content: string;
+  audienceType: 'all' | 'segemented';
+  scheduleType: 'one_off' | 'scheduled';
+  scheduledDatetime: string;
+  payloadOptions: { [key: string]: any };
+  metadata: { [key: string]: any };
+  users?: string[];
+  groups?: string[];
 }
 
 export interface IRawMessage {

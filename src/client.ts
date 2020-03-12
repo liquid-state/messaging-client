@@ -1,4 +1,4 @@
-import { MessagingError, MessagingAPIError } from './utils';
+import { MessagingError, MessagingAPIError, convertArrayToListString } from './utils';
 import {
   IOptions,
   IdentityOptions,
@@ -6,6 +6,7 @@ import {
   IRawMessage,
   IMessage,
   IPagination,
+  ICreateMessageInput,
 } from './types';
 
 const defaultOptions = {
@@ -14,6 +15,7 @@ const defaultOptions = {
 };
 
 const pathMap: { [key: string]: string } = {
+  createMessage: 'messages/',
   deleteMessage: 'messages/{{messageId}}/',
   getMessageDetails: 'messages/{{messageId}}/',
   listMessages: 'messages/',
@@ -103,6 +105,50 @@ class MessagingClient implements IMessagingClient {
 
   private getAuthHeader = () =>
     this.identity.jwt ? `Bearer ${this.identity.jwt}` : `Token ${this.identity.apiKey}`;
+
+  createMessage = async (body: ICreateMessageInput) => {
+    const url = this.getUrl('createMessage');
+    const {
+      audienceType,
+      content,
+      groups,
+      metadata,
+      payloadOptions,
+      scheduledDatetime,
+      scheduleType,
+      title,
+      users,
+    } = body;
+
+    const formData = new FormData();
+    formData.append('audience_type', audienceType);
+    formData.append('content', content);
+    formData.append('metadata', JSON.stringify(metadata));
+    formData.append('payload_options', JSON.stringify(payloadOptions));
+    formData.append('scheduled_datetime', scheduledDatetime);
+    formData.append('schedule_type', scheduleType);
+    formData.append('title', title);
+    if (users) {
+      formData.append('identities', convertArrayToListString(users));
+    }
+    if (groups) {
+      formData.append('group_ids', convertArrayToListString(groups));
+    }
+
+    const resp = await this.fetch(url, {
+      method: 'POST',
+      headers: {
+        Authorization: this.getAuthHeader(),
+      },
+      body: formData,
+    });
+
+    if (!resp.ok) {
+      throw MessagingAPIError('Unable to create message', resp);
+    }
+
+    return resp.json();
+  };
 
   deleteMessage = async (messageId: string) => {
     const url = this.getUrl('deleteMessage');
