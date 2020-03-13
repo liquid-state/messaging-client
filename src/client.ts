@@ -161,7 +161,9 @@ class MessagingClient implements IMessagingClient {
     }
 
     // TODO: map json response to camelCase for frontend
-    return resp.json();
+    const rawMessage = await resp.json();
+
+    return this.mapRawMessage(rawMessage);
   };
 
   deleteMessage = async (messageId: string) => {
