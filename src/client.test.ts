@@ -14,7 +14,7 @@ describe('Messaging client', () => {
     try {
       new MessagingClient({});
     } catch (e) {
-      expect(e).toBe('Messaging Error: You must specify a JWT');
+      expect(e).toBe('Messaging Error: You must specify a JWT or API Key');
     }
   });
 });

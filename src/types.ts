@@ -2,7 +2,7 @@ export interface IMessagingClient {
   createMessage(body: ICreateMessageInput): Promise<any>;
   deleteMessage(messageId: string): Promise<boolean>;
   listMessages(
-    page?: number
+    page?: number,
   ): Promise<{
     nextPage: number | null;
     result: IMessage[];
@@ -27,6 +27,9 @@ export interface ICreateMessageInput {
   scheduledDatetime: string;
   payloadOptions: { [key: string]: any };
   metadata: { [key: string]: any };
+  isRecurring?: boolean;
+  recurringOffset?: number;
+  recurringUnit?: string;
   users?: string[];
   groups?: string[];
 }

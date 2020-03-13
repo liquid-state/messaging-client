@@ -112,8 +112,11 @@ class MessagingClient implements IMessagingClient {
       audienceType,
       content,
       groups,
+      isRecurring,
       metadata,
       payloadOptions,
+      recurringOffset,
+      recurringUnit,
       scheduledDatetime,
       scheduleType,
       title,
@@ -128,6 +131,11 @@ class MessagingClient implements IMessagingClient {
     formData.append('scheduled_datetime', scheduledDatetime);
     formData.append('schedule_type', scheduleType);
     formData.append('title', title);
+    if (isRecurring && recurringOffset && recurringUnit) {
+      formData.append('is_recurring', '1');
+      formData.append('recurring_offset', `${recurringOffset}`);
+      formData.append('recurring_unit', recurringUnit);
+    }
     if (users) {
       formData.append('identities', convertArrayToListString(users));
     }
@@ -147,6 +155,7 @@ class MessagingClient implements IMessagingClient {
       throw MessagingAPIError('Unable to create message', resp);
     }
 
+    // TODO: map json response to camelCase for frontend
     return resp.json();
   };
 
