@@ -117,6 +117,7 @@ class MessagingClient implements IMessagingClient {
       payloadOptions,
       recurringOffset,
       recurringUnit,
+      recurringEndDatetime,
       scheduledDatetime,
       scheduleType,
       title,
@@ -135,6 +136,10 @@ class MessagingClient implements IMessagingClient {
       formData.append('is_recurring', '1');
       formData.append('recurring_offset', `${recurringOffset}`);
       formData.append('recurring_unit', recurringUnit);
+
+      if (recurringEndDatetime) {
+        formData.append('recurring_end_datetime', recurringEndDatetime);
+      }
     }
     if (users) {
       formData.append('identities', convertArrayToListString(users));

@@ -30,6 +30,7 @@ export interface ICreateMessageInput {
   isRecurring?: boolean;
   recurringOffset?: number;
   recurringUnit?: string;
+  recurringEndDatetime?: string;
   users?: string[];
   groups?: string[];
 }
