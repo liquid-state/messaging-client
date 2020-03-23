@@ -16,6 +16,7 @@
   "repository": "git@github.com:liquid-state/messaging-client.git",
   "author": "Liquid State <dev@liquid-state.com>",
   "license": "MIT",
+  "private": false,
   "bugs": {
     "url": "https://github.com/liquid-state/messaging-client/issues"
   },

@@ -2,7 +2,7 @@ export interface IMessagingClient {
   createMessage(body: ICreateMessageInput): Promise<any>;
   deleteMessage(messageId: string): Promise<boolean>;
   listMessages(
-    page?: number,
+    page?: number
   ): Promise<{
     nextPage: number | null;
     result: IMessage[];

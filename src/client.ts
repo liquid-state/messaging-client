@@ -142,10 +142,10 @@ class MessagingClient implements IMessagingClient {
       }
     }
     if (users) {
-      formData.append('identities', convertArrayToListString(users));
+      users.forEach(identity => formData.append('identities', identity));
     }
     if (groups) {
-      formData.append('group_ids', convertArrayToListString(groups));
+      groups.forEach(groupId => formData.append('group_ids', groupId));
     }
 
     const resp = await this.fetch(url, {
