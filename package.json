@@ -1,6 +1,6 @@
 {
   "name": "@liquid-state/messaging-client",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Client library for Liquid State messaging",
   "files": [
     "dist/"
