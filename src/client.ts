@@ -200,7 +200,7 @@ class MessagingClient implements IMessagingClient {
 
   listMessages = async (page?: number) => {
     const url = this.getUrl('listMessages');
-    const resp = await this.fetch(url, {
+    const resp = await this.fetch(`${url}?page=${page || 1}`, {
       method: 'GET',
       headers: {
         Authorization: this.getAuthHeader(),
