@@ -33,6 +33,7 @@ export interface ICreateMessageInput {
   recurringEndDatetime?: string;
   users?: string[];
   groups?: string[];
+  ownerId?: string;
 }
 
 export interface IRawMessage {

@@ -40,9 +40,9 @@ class MessagingClient implements IMessagingClient {
     this.fetch = this.options.fetch || window.fetch.bind(window);
   }
 
-  private getUrl(endpoint: string) {
+  private getUrl(endpoint: string, queryString?: string) {
     let result;
-    result = `${this.options.baseUrl}${pathMap[endpoint]}`;
+    result = `${this.options.baseUrl}${pathMap[endpoint]}${queryString || ''}`;
     return result;
   }
 
@@ -107,13 +107,13 @@ class MessagingClient implements IMessagingClient {
     this.identity.jwt ? `Bearer ${this.identity.jwt}` : `Token ${this.identity.apiKey}`;
 
   createMessage = async (body: ICreateMessageInput) => {
-    const url = this.getUrl('createMessage');
     const {
       audienceType,
       content,
       groups,
       isRecurring,
       metadata,
+      ownerId,
       payloadOptions,
       recurringOffset,
       recurringUnit,
@@ -123,6 +123,10 @@ class MessagingClient implements IMessagingClient {
       title,
       users,
     } = body;
+    const url = this.getUrl(
+      'createMessage',
+      ownerId ? `?owner_id=${ownerId}&filter_by_owner=false` : undefined
+    );
 
     const formData = new FormData();
     formData.append('audience_type', audienceType);
