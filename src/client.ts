@@ -202,14 +202,19 @@ class MessagingClient implements IMessagingClient {
     return resp.json();
   };
 
-  listMessages = async (page?: number) => {
+  listMessages = async (page?: number, ownerId?: string, status?: 'sent' | 'scheduled') => {
     const url = this.getUrl('listMessages');
-    const resp = await this.fetch(`${url}?page=${page || 1}`, {
-      method: 'GET',
-      headers: {
-        Authorization: this.getAuthHeader(),
-      },
-    });
+    const resp = await this.fetch(
+      `${url}?page=${page || 1}${ownerId ? `&owner_id=${ownerId}` : ''}${
+        status ? `&status=${status}` : ''
+      }`,
+      {
+        method: 'GET',
+        headers: {
+          Authorization: this.getAuthHeader(),
+        },
+      }
+    );
     if (!resp.ok) {
       throw MessagingAPIError('Unable to get list of messages', resp);
     }
